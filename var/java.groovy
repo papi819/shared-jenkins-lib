@@ -1,16 +1,22 @@
-def buildApp() {
-    sh 'mvn clean compile'
-}
-
-def runTests() {
-    sh 'mvn test'
-}
-
-def packageApp() {
-    sh 'mvn package'
-}
-
-def deployApp(String appName) {
-    sh "echo Deploying ${appName}"
-    sh "cp target/*.jar /opt/apps/${appName}/"
+def call(Map config){
+    pipeline{
+        tools{
+            maven "${config.mvnt}"
+        }
+        agent any
+        stages{
+            stage('Checkout'){
+                steps{
+                    git branch : config.branch,
+                    credentialsId : config.credid,
+                    url : config.repourl
+                }
+            }
+            stage('Build'){
+                steps{
+                    sh "mvn ${config.mvncommand}"
+                }
+            }
+        }
+    }
 }
